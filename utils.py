@@ -40,6 +40,10 @@ class Point(object):
         return Point.__IterablePoint(from_point, to_point)
 
 
+class FormatError(Exception):
+    pass
+
+
 class FileReader(object):
     def __init__(self, input_file="input.txt"):
         self._input_file = open(input_file)
@@ -54,24 +58,19 @@ class FileReader(object):
 
     def get_world(self):
         reader = self.__get_line()
+        counties_count = 0
         while True:
             data = next(reader)
-
-            if not data:
-                self._input_file.close()
-                return None
 
             try:
                 counties_count = int(data)
             except ValueError:
-                print("count error")
-                break
+                print("count must be integer: {}".format(data))
+                raise FormatError
 
             world = []
 
             for i in range(counties_count):
-                world.append(next(reader).split(maxsplit=1))
+                world.append(next(reader))
 
             return world
-
-
