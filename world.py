@@ -1,4 +1,5 @@
 import re
+from threading import Thread
 
 from country import Country
 from utils import Point
@@ -9,7 +10,7 @@ class World(object):
 
     def __init__(self, world_id, raw_world):
         self.__world_id = world_id
-        self._countries = {}
+        self._countries = []
 
         self.is_init = False
 
@@ -40,10 +41,15 @@ class World(object):
                     Country.clean_cash(self.__world_id)
                     return
 
+                if xl <= 0 or xh <= 0 or yl <= 0 or yh <= 0:
+                    print("Coords have to be positive".format(coords))
+                    Country.clean_cash(self.__world_id)
+                    return
+
                 bottom_point = Point(xl, yl)
                 top_point = Point(xh, yh)
 
-                self._countries[country_name] = Country(bottom_point, top_point, country_name, self.__world_id)
+                self._countries.append(Country(bottom_point, top_point, country_name, self.__world_id))
             else:
                 print("Country format error: {}".format(raw_country))
                 Country.clean_cash(self.__world_id)
@@ -52,14 +58,14 @@ class World(object):
         self.is_init = True
 
     def world_handler(self):
-        while not all([country.is_complete for country in self._countries.values()]):
-            for country in self._countries.values():
+        while not all([country.is_complete for country in self._countries]):
+            for country in self._countries:
                 country.start_day()
 
-            for country in self._countries.values():
+            for country in self._countries:
                 country.end_day()
 
-        res = [(country.complete_day, country.name) for country in self._countries.values()]
+        res = [(country.complete_day, country.name) for country in self._countries]
 
         World.result[self.__world_id] = res
 
@@ -69,7 +75,7 @@ class World(object):
     def __path_builder(self, country=None, neighbors=None):
 
         if not country:
-            country = list(self._countries.values())[0]
+            country = self._countries[0]
 
         if neighbors is None:
             neighbors = {country}
@@ -83,6 +89,14 @@ class World(object):
 
         return neighbors
 
-    @property
+    def run(self):
+        if self.is_init:
+            if self.check_connections():
+                return Thread(target=self.world_handler)
+            else:
+                print("Not all country can be connect. World: {}".format(self.countries_names()))
+                Country.clean_cash(self.__world_id)
+                return None
+
     def countries_names(self):
-        return [country for country in self._countries]
+        return [country.name for country in self._countries]

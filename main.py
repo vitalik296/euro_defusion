@@ -1,9 +1,8 @@
 import sys
-from threading import Thread
 
-from world import World
 from country import Country
 from utils import FileReader, FormatError
+from world import World
 
 
 def main(argv):
@@ -24,14 +23,13 @@ def main(argv):
             continue
 
         world = World(len(threads) + 1, raw_world)
-        if world.is_init:
-            if world.check_connections():
-                threads.append(Thread(target=world.world_handler))
-                threads[-1].start()
-            else:
-                print("Sorry but not all country connect. World: {}".format(world.countries_names))
-                Country.clean_cash(len(threads) + 1)
-                continue
+
+        thread = world.run()
+        if thread:
+            threads.append(thread)
+            thread.start()
+        else:
+            Country.clean_cash(len(threads) + 1)
 
     for thread in threads:
         thread.join()
