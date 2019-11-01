@@ -24,23 +24,19 @@ class City(object):
     def get_neighbors(self):
         north_neighbor = self._city_cash[self.__world_id].get((self.__point.x, self.__point.y + 1), None)
         if north_neighbor:
-            self.add_neighbor(north_neighbor)
-            north_neighbor.add_neighbor(self)
+            self.link(north_neighbor)
 
         east_neighbor = self._city_cash[self.__world_id].get((self.__point.x + 1, self.__point.y), None)
         if east_neighbor:
-            self.add_neighbor(east_neighbor)
-            east_neighbor.add_neighbor(self)
+            self.link(east_neighbor)
 
         south_neighbor = self._city_cash[self.__world_id].get((self.__point.x, self.__point.y - 1), None)
         if south_neighbor:
-            self.add_neighbor(south_neighbor)
-            south_neighbor.add_neighbor(self)
+            self.link(south_neighbor)
 
         west_neighbor = self._city_cash[self.__world_id].get((self.__point.x - 1, self.__point.y), None)
         if west_neighbor:
-            self.add_neighbor(west_neighbor)
-            west_neighbor.add_neighbor(self)
+            self.link(west_neighbor)
 
     def add_coins(self, income):
         for coin_motif, coin_count in income.items():
@@ -63,6 +59,10 @@ class City(object):
         for coin_motif, coin_count in self._daily_income.items():
             self._coins[coin_motif] = self._coins.get(coin_motif, 0) + coin_count
         self._daily_income = {}
+
+    def link(self, new_neighbor):
+        self.add_neighbor(new_neighbor)
+        new_neighbor.add_neighbor(self)
 
     def add_neighbor(self, city):
         self.__neighbors.add(city)
