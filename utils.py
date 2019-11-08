@@ -58,19 +58,18 @@ class FileReader(object):
 
     def get_world(self):
         reader = self.__get_line()
-        counties_count = 0
         while True:
             data = next(reader)
 
             try:
-                counties_count = int(data)
+                countries_count = int(data)
             except ValueError:
                 print("count must be integer: {}".format(data))
                 raise FormatError
 
             world = []
 
-            for i in range(counties_count):
+            for i in range(countries_count):
                 world.append(next(reader))
 
             return world
